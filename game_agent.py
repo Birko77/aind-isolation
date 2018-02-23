@@ -34,8 +34,7 @@ def custom_score(game, player):
     float
         The heuristic value of the current game state to the specified player.
     """
-    # TODO: finish this function!
-    raise NotImplementedError
+    return game.utility(player)
 
 
 def custom_score_2(game, player):
@@ -212,10 +211,49 @@ class MinimaxPlayer(IsolationPlayer):
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
 
-        # # TODO: finish this function!
-        # raise NotImplementedError
+        best_score = float("-inf")
+        best_move = (-1, -1)
+        for m in game.get_legal_moves():
 
-        return (1,1)
+            v = self.min_value(game.forecast_move(m), depth - 1)
+            if v > best_score:
+                best_score = v
+                best_move = m
+        return best_move
+
+    def min_value(self, gameState, depth):
+
+        if self.time_left() < self.TIMER_THRESHOLD:
+            raise SearchTimeout()
+
+        if self.terminal_test(gameState, depth):
+            return self.score(gameState, self)
+
+        v = float("inf")
+        for m in gameState.get_legal_moves():
+            v = min(v, self.max_value(gameState.forecast_move(m), depth - 1))
+        return v
+
+    def max_value(self, gameState, depth):
+
+        if self.time_left() < self.TIMER_THRESHOLD:
+            raise SearchTimeout()
+
+        if self.terminal_test(gameState, depth):
+            return self.score(gameState, self)
+
+        v = float("-inf")
+        for m in gameState.get_legal_moves():
+            v = max(v, self.min_value(gameState.forecast_move(m), depth - 1))
+        return v
+
+    def terminal_test(self, gameState, depth):
+
+        if self.time_left() < self.TIMER_THRESHOLD:
+            raise SearchTimeout()
+
+        return gameState.is_loser(self) or gameState.is_winner(self) or depth == 0
+
 
 
 class AlphaBetaPlayer(IsolationPlayer):
