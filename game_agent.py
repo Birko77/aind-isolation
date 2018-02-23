@@ -345,5 +345,57 @@ class AlphaBetaPlayer(IsolationPlayer):
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
 
-        # TODO: finish this function!
-        raise NotImplementedError
+        best_score = float("-inf")
+        best_move = (-1, -1)
+        for m in game.get_legal_moves():
+
+            v = self.min_value(game.forecast_move(m), depth - 1, alpha, beta)
+            if v > best_score:
+                best_score = v
+                best_move = m
+            #    α ← MAX(α, v)
+            alpha = max(alpha, v)
+        return best_move
+
+    def min_value(self, gameState, depth, alpha, beta):
+
+        if self.time_left() < self.TIMER_THRESHOLD:
+            raise SearchTimeout()
+
+        if self.terminal_test(gameState, depth):
+            return self.score(gameState, self)
+
+        v = float("inf")
+        for m in gameState.get_legal_moves():
+            v = min(v, self.max_value(gameState.forecast_move(m), depth - 1, alpha, beta))
+            #    if v ≤ α then return v
+            #    β ← MIN(β, v)
+            if v <= alpha:
+                return v
+            beta = min(beta, v)
+        return v
+
+    def max_value(self, gameState, depth, alpha, beta):
+
+        if self.time_left() < self.TIMER_THRESHOLD:
+            raise SearchTimeout()
+
+        if self.terminal_test(gameState, depth):
+            return self.score(gameState, self)
+
+        v = float("-inf")
+        for m in gameState.get_legal_moves():
+            v = max(v, self.min_value(gameState.forecast_move(m), depth - 1, alpha, beta))
+            #    if v ≥ β then return v
+            #    α ← MAX(α, v)
+            if v >= beta:
+                return v
+            alpha = max(alpha, v)
+        return v
+
+    def terminal_test(self, gameState, depth):
+
+        if self.time_left() < self.TIMER_THRESHOLD:
+            raise SearchTimeout()
+
+        return gameState.is_loser(self) or gameState.is_winner(self) or depth == 0
